@@ -19,7 +19,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module SpaceShip(
-	input enable,
     input clk,
     input reset,
     input left,
@@ -60,7 +59,7 @@ always @(posedge clk) begin
                                 gunPosition <= SCREEN_WIDTH/2;
                 end
                         
-                if (enable && right && gunPosition + SHIP_WIDTH/2 < SCREEN_WIDTH - H_OFFSET) begin
+                if (right && gunPosition + SHIP_WIDTH/2 < SCREEN_WIDTH - H_OFFSET) begin
                         if (SCREEN_WIDTH - H_OFFSET - gunPosition + SHIP_WIDTH/2 > STEP) begin
                                 gunPosition <= gunPosition + STEP ;
                         end
@@ -71,7 +70,7 @@ always @(posedge clk) begin
                 
                 
                 
-                if (enable && left && gunPosition - SHIP_WIDTH/2 > H_OFFSET) begin
+                if (left && gunPosition - SHIP_WIDTH/2 > H_OFFSET) begin
                         if (gunPosition - SHIP_WIDTH/2 - H_OFFSET > STEP) begin
                                 gunPosition <= gunPosition - STEP ;
                         end
