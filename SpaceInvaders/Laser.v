@@ -10,7 +10,7 @@ module Laser (
 
   output [9:0] xLaser,
   output [9:0] yLaser,
-  output [2:0] colorLaser,
+  output [2:0] colorLaser
   );
 
 parameter BACKGROUND = 0 ; // Background color code
