@@ -7,10 +7,9 @@ module Laser (
   input [9:0] gunPosition,
   input [9:0] hPos,
   input [9:0] vPos,
-
-  output [9:0] xLaser,
-  output [9:0] yLaser,
-  output [2:0] colorLaser
+  output reg[9:0] xLaser,
+  output reg[9:0] yLaser,
+  output reg[2:0] colorLaser
   );
 
 parameter BACKGROUND = 0 ; // Background color code
@@ -30,55 +29,54 @@ assign vgaInLaser = (hPos - xLaser) * (hPos - xLaser) + (vPos - yLaser) * (vPos 
 always @ (clk) begin
   if (reset) begin
     laserAlive <= 0;
+	 // put the laser at the right bottom of the screen
+	 xLaser = SCREEN_WIDTH - 1;
+	 yLaser = SCREEN_HEIGHT - 1;
   end
 
   else if (enable) begin
 
     // LASER ALIVE
     if (laserAlive) begin
-      if (killingAlien)
-        // we destroy the laser
-        laserAlive <= 0;
-
+      if (killingAlien) begin
+			// we destroy the laser
+			laserAlive <= 0;
+			// put the laser at the right bottom of the screen
+			xLaser = SCREEN_WIDTH - 1;
+			yLaser = SCREEN_HEIGHT - 1;
+		end
       else begin
         if (yLaser > 0)
           // update laser position
-          yLaser <= yLaser - STEP_MOTION;
-        else
+          yLaser = yLaser - STEP_MOTION;
+        else begin
           // laser out of screen, so we destroy it
           laserAlive <= 0;
+			 // put the laser at the right bottom of the screen
+			 xLaser = SCREEN_WIDTH - 1;
+			 yLaser = SCREEN_HEIGHT - 1;
+			end
       end
     end
 
     // LASER NOT ALIVE
     else begin
-      if (fire)
+      if (fire) begin
         // fire laser
         laserAlive <= 1;
+		 // put the laser at start position
+		 xLaser = gunPosition;
+		 yLaser = SCREEN_HEIGHT - V_OFFSET - SHIP_HEIGHT - RADIUS;
+		 end
     end
 
     // HANDLE COLOR
     if (laserAlive & vgaInLaser) 
-      colorLaser = LASER
+      colorLaser = LASER;
     else
-      colorLaser = BACKGROUND
+      colorLaser = BACKGROUND;
 
   end
 end
 
-
-// fire the laser or hide it
-always @ (laserAlive) begin
-  if (laserAlive) begin
-    // put the laser at start position
-    xLaser <= gunPosition;
-    yLaser <= SCREEN_HEIGHT - V_OFFSET - SHIP_HEIGHT - RADIUS;
-  end else begin
-    // put the laser at the right bottom of the screen
-    xLaser <= SCREEN_WIDTH - 1;
-    yLaser <= SCREEN_HEIGHT - 1;
-  end
-end
-
-
-endmodule // Laser
+endmodule
