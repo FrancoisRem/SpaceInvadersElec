@@ -18,7 +18,7 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module colorAlien(
+module ColorAlien(
     input [9:0] hPos,
     input [9:0] vPos,
     input [9:0] xAlien,
