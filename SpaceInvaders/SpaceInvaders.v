@@ -69,6 +69,7 @@ ZigZagAlien zigZagAlien(.clk(clk),.reset(reset),
 ColorAlien colorAlien(.hPos(hPos),.vPos(vPos),.xAlien(xAlien),
 .yAlien(yAlien),.alive(alive),.colorAlien(colorAlien));
 
+Rgb rgb(.color(colorOutput),.rgb(rgb));
 
 always @(posedge clk) begin
 	colorSum = colorLaser + colorAlien + colorSpaceship;
