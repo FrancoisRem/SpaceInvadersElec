@@ -6,17 +6,17 @@ module AliensMotion(
     input [9:0] hPos,
     input [9:0] vPos,
     output reg killingAlien,
-    output canLeft,
-    output canRight,
-    output victory,
-    output defeat,
+    output reg canLeft,
+    output reg canRight,
+    output reg victory,
+    output reg defeat,
     output reg [9:0] xAlien, // needs to be signed 
     output reg [9:0] yAlien,
-    output reg [35:0] alive // On place les 36 aliens; 
+    output reg [31:0] alive // On place les 36 aliens; 
 );
 
 parameter NB_LIN = 4;
-parameter NB_COL = 9;
+parameter NB_COL = 8;
 parameter OFFSET_H = 10;
 parameter OFFSET_V = 5 ; 
 parameter ALIENS_WIDTH = 20 ;
@@ -24,7 +24,7 @@ parameter ALIENS_HEIGHT = 10;
 parameter STEP_H = 20 ; // Space between Aliens
 parameter STEP_V = 10 ;
 parameter STEP_H_MOTION = 1 ;
-parameter STEP_V_MOTION = = 15 ; // Step for aliens motion going down
+parameter STEP_V_MOTION = 15 ; // Step for aliens motion going down
 parameter SCREEN_WIDTH = 640 ;
 parameter SCREEN_HEIGHT = 480;
 
@@ -43,19 +43,22 @@ reg indxRight; // Last alive col
 reg indxBottom; // First layer 
 reg testBottom = 0;
 
+integer i;
+integer j;
+integer k;
 // First, we move our aliens : 
 
-always (@posedge clk) begin 
+always @(posedge clk) begin 
 
     
 
     if (reset) begin 
-        alive = //Init all on 1;
-        xAlien = 30; //Default value 
-        yAlien = 30;  // Default value 
-        colAvailables = //Init all on 1;
-        indxLeft = 0;
-        indxRight = NB_COL-1;
+        alive <= 4294967295;//Init all on 1,2**35-1
+        xAlien <= 30; //Default value 
+        yAlien <= 30;  // Default value 
+        //colAvailables = //Init all on 1;
+        indxLeft <= 0;
+        indxRight <= NB_COL-1;
         indxBottom = NB_LIN -1;
         testBottom = 0;
     end 
@@ -71,9 +74,9 @@ always (@posedge clk) begin
     end 
 
     // Update on indxBottom : 
-
-    for (i = 0 ; i < NB_COL ; i = i+1) begin 
-        if (alive[indxBottom*NB_COL + i]) testBottom = 1;
+    
+    for (k = 0 ; k < NB_COL ; k = k+1) begin 
+        if (alive[indxBottom*NB_COL + k]) testBottom = 1;
     end 
 
     if (testBottom == 0) indxBottom = indxBottom - 1;
@@ -117,14 +120,14 @@ always (@posedge clk) begin
                 else killingAlien <= 0;
             end 
             else if (xAlien + j*STEP_H + j*ALIENS_WIDTH < xLaser && yAlien + i*STEP_V + i*ALIENS_HEIGHT < yLaser) begin 
-                if (xLaser-xAlien + j*STEP_H + j*ALIENS_WIDTH < ALIENS_WIDTH/2) && (yLaser-yAlien + i*STEP_V + i*ALIENS_HEIGHT < ALIENS_HEIGHT/2)) begin 
+                if ((xLaser-xAlien + j*STEP_H + j*ALIENS_WIDTH < ALIENS_WIDTH/2) && (yLaser-yAlien + i*STEP_V + i*ALIENS_HEIGHT < ALIENS_HEIGHT/2)) begin 
                     killingAlien <= 1;
                     alive[i*NB_COL + j] <= 0;
                 end 
                 else killingAlien <= 0;
             end 
             else begin 
-                if (xAlien + j*STEP_H + j*ALIENS_WIDTH - xLaser < ALIENS_WIDTH/2) && (yLaser-yAlien + i*STEP_V + i*ALIENS_HEIGHT < ALIENS_HEIGHT/2)) begin 
+                if ((xAlien + j*STEP_H + j*ALIENS_WIDTH - xLaser < ALIENS_WIDTH/2) && (yLaser-yAlien + i*STEP_V + i*ALIENS_HEIGHT < ALIENS_HEIGHT/2)) begin 
                     killingAlien <= 1;
                     alive[i*NB_COL + j] <= 0;
                 end 
@@ -142,13 +145,13 @@ always (@posedge clk) begin
         LEFT : if (canLeft) xAlien <= xAlien - STEP_V_MOTION;
         RIGHT : if (canRight) xAlien <= xAlien + STEP_V_MOTION;
         DOWN : if (defeat == 0) yAlien <= yAlien + STEP_H_MOTION;
-        default : 
+ 
     endcase
 
 
 end 
 
-
+endmodule
 
 
 
