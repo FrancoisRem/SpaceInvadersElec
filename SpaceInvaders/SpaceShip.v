@@ -23,10 +23,10 @@ module SpaceShip(
     input reset,
     input left,
     input right,
-    input [0:9] hPos,
-    input [0:9] vPos,
-    output reg [0:9] gunPosition,
-    output reg [0:2] color
+    input [9:0] hPos,
+    input [9:0] vPos,
+    output reg [9:0] gunPosition,
+    output reg [2:0] color
     );
 
 parameter SCREEN_WIDTH = 640 ;
