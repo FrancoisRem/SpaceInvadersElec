@@ -39,6 +39,7 @@ module ZigZagAlien(
 		   if (enable)
 				case (etat)
 					NO_MOTION: if (canRight) etat <= RIGHT;
+						   else etat <= DOWN;
 					RIGHT:     if (~canRight) etat <= DOWN;
 					DOWN:      if (canLeft) etat <= LEFT;
 							     else if (canRight) etat <= RIGHT;
