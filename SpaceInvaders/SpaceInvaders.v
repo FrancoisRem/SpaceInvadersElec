@@ -21,7 +21,12 @@ wire [9:0] yLaser;
 wire enableVga;
 wire enableZigZag;
 wire enableLaser;
-
+wire [2:0] motion;
+wire canLeft;
+wire canRight;
+wire [9:0] xAlien;
+wire [9:0] yAlien;
+reg [35:0] alive;
 
 TimeUnitEnable#(.FREQ_WANTED(25000000)) timeUnitVga(.clk(clk),.reset(reset),
 .enable(1),.pulse(enableVga));
@@ -45,6 +50,14 @@ Laser laser(.clk(clk),.reset(reset),.enable(enable),
 .fire(fire),.killingAlien(killingAlien),.gunPosition(gunPosition),
 .hPos(hPos),.vPos(vPos),.xLaser(xLaser),.yLaser(yLaser),
 .colorLaser(colorLaser));
+
+ZigZagAlien zigZagAlien(.clk(clk),.reset(reset),
+.enable(enableZigZag),.canLeft(canLeft),.canRight(canRight),
+.Motion(motion));
+
+ColorAlien colorAlien(.hPos(hPos),.vPos(vPos),.xAlien(xAlien),
+.yAlien(yAlien),.alive(alive),.colorAlien(colorAlien));
+
 
 always @(posedge clk) begin
 	colorSum = colorLaser + colorAlien + colorSpaceship;
