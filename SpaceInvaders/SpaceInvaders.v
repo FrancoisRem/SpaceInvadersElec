@@ -12,25 +12,28 @@ module SpaceInvaders (
 // WIRES
 wire [9:0] hPos;
 wire [9:0] vPos;
-wire [2:0] color;
+wire [2:0] colorSpaceship;
+wire [2:0] colorLaser;
+wire [2:0] colorAlien;
 wire [2:0] colorOutput;
+reg [2:0] colorSum;
 wire killingAlien;
 wire [9:0] gunPosition;
 wire [9:0] xLaser;
 wire [9:0] yLaser;
 wire enableVga;
 wire enableZigZag;
-wire enableVga;
+wire enableLaser;
 
-// TimeUnit enable
-TimeUnitEnable#(FREQ_WANTED(25000000)) timeUnitVga(.clk(clk),.reset(reset),
+
+TimeUnitEnable#(.FREQ_WANTED(25000000)) timeUnitVga(.clk(clk),.reset(reset),
 .enable(1),.pulse(enableVga));
 
-TimeUnitEnable#(FREQ_WANTED(25000000)) timeUnitVga(.clk(clk),.reset(reset),
-.enable(1),.pulse(enableVga));
+TimeUnitEnable#(.FREQ_WANTED(100)) timeUnitZigZag(.clk(clk),.reset(reset),
+.enable(1),.pulse(enableZigZag));
 
-TimeUnitEnable#(FREQ_WANTED(25000000)) timeUnitVga(.clk(clk),.reset(reset),
-.enable(1),.pulse(enableVga));
+TimeUnitEnable#(.FREQ_WANTED(300)) timeUnitLaser(.clk(clk),.reset(reset),
+.enable(1),.pulse(enableLaser));
 
 // MODULES
 Vga vga(.clk(clk),.enable(enable),.reset(reset),.hPos(hPos),
@@ -38,18 +41,18 @@ Vga vga(.clk(clk),.enable(enable),.reset(reset),.hPos(hPos),
 
 Button btnLeftModule(.clk(clk), .reset(reset), .pressed(btnLeftModule), .pulse);
 SpaceShip spaceship(.clk(clk),.reset(reset),.hPos(hPos),
-.vPos(vPos),.gunPosition(gunPosition),.color(color));
+.vPos(vPos),.gunPosition(gunPosition),.color(colorSpaceship));
 
-FinalColor finalcolor(.colorInput(color),.hPos(hPos),
+FinalColor finalcolor(.colorInput(colorSum),.hPos(hPos),
 .vPos(vPos),.color(colorOutput));
 
 Laser laser(.clk(clk),.reset(reset),.enable(enable),
 .fire(fire),.killingAlien(killingAlien),.gunPosition(gunPosition),
 .hPos(hPos),.vPos(vPos),.xLaser(xLaser),.yLaser(yLaser),
-.colorLaser(color));
+.colorLaser(colorLaser));
 
-always @ (clk) begin
-
+always @(posedge clk) begin
+	colorSum = colorLaser + colorAlien + colorSpaceship;
 end
 
 
