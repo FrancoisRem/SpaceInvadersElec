@@ -17,10 +17,15 @@ wire [2:0] colorLaser;
 wire [2:0] colorAlien;
 wire [2:0] colorOutput;
 reg [2:0] colorSum;
+
+wire btnLeftWire;
+wire btnRightWire;
+
 wire killingAlien;
 wire [9:0] gunPosition;
 wire [9:0] xLaser;
 wire [9:0] yLaser;
+
 wire enableVga;
 wire enableZigZag;
 wire enableLaser;
@@ -39,17 +44,21 @@ TimeUnitEnable#(.FREQ_WANTED(300)) timeUnitLaser(.clk(clk),.reset(reset),
 Vga vga(.clk(clk),.enable(enable),.reset(reset),.hPos(hPos),
 .vPos(vPos),.hSync(hSync),.vSync(vSync));
 
-Button btnLeftModule(.clk(clk), .reset(reset), .pressed(btnLeftModule), .pulse);
-SpaceShip spaceship(.clk(clk),.reset(reset),.hPos(hPos),
-.vPos(vPos),.gunPosition(gunPosition),.color(colorSpaceship));
-
-FinalColor finalcolor(.colorInput(colorSum),.hPos(hPos),
-.vPos(vPos),.color(colorOutput));
+Button btnLeftModule(.clk(clk), .reset(reset), .pressed(btnLeftInput),
+.pulse(btnLeftWire));
+Button btnRightModule(.clk(clk), .reset(reset), .pressed(btnRightInput),
+.pulse(btnRightWire));
+SpaceShip spaceship(.clk(clk),.reset(reset),
+.left(btnLeftWire),.right(btnRightWire),
+.hPos(hPos),.vPos(vPos),.gunPosition(gunPosition),.color(colorSpaceship));
 
 Laser laser(.clk(clk),.reset(reset),.enable(enable),
 .fire(fire),.killingAlien(killingAlien),.gunPosition(gunPosition),
 .hPos(hPos),.vPos(vPos),.xLaser(xLaser),.yLaser(yLaser),
 .colorLaser(colorLaser));
+
+FinalColor finalcolor(.colorInput(colorSum),.hPos(hPos),
+.vPos(vPos),.color(colorOutput));
 
 always @(posedge clk) begin
 	colorSum = colorLaser + colorAlien + colorSpaceship;
