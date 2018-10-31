@@ -6,7 +6,9 @@ module SpaceInvaders (
   input fire,
   output [7:0] rgb,
   output hSync,
-  output vSync
+  output vSync,
+  output victory,
+  output defeat
   );
 
 // WIRES
@@ -46,9 +48,6 @@ TimeUnitEnable#(.FREQ_WANTED(300)) timeUnitLaser(.clk(clk),.reset(reset),
 .enable(1),.pulse(enableLaser));
 
 // MODULES
-Vga vga(.clk(clk),.enable(enable),.reset(reset),.hPos(hPos),
-.vPos(vPos),.hSync(hSync),.vSync(vSync));
-
 Button btnLeftModule(.clk(clk), .reset(reset), .pressed(btnLeftInput),
 .pulse(btnLeftWire));
 Button btnRightModule(.clk(clk), .reset(reset), .pressed(btnRightInput),
@@ -65,10 +64,19 @@ Laser laser(.clk(clk),.reset(reset),.enable(enable),
 ZigZagAlien zigZagAlien(.clk(clk),.reset(reset),
 .enable(enableZigZag),.canLeft(canLeft),.canRight(canRight),
 .Motion(motion));
-
+AliensMotion aliensMotion(
+  .clk(clk), .reset(reset), .xLaser(xLaser), yLaser(yLaser), 
+  .motion(motion), .hPos(hPos), .vPos(vPos),
+  .killingAlien(killingAlien), .canLeft(canLeft), .canRight(canRight),
+  .victory(victory), .defeat(defeat),
+  xAlien(xAlien), .yAlien(yAlien), .alive(alive));
 ColorAlien colorAlien(.hPos(hPos),.vPos(vPos),.xAlien(xAlien),
 .yAlien(yAlien),.alive(alive),.colorAlien(colorAlien));
 
+Vga vga(.clk(clk),.enable(enable),.reset(reset),.hPos(hPos),
+.vPos(vPos),.hSync(hSync),.vSync(vSync));
+FinalColor finalcolor(.colorInput(colorSum),.hPos(hPos),
+.vPos(vPos),.color(colorOutput));
 Rgb rgb(.color(colorOutput),.rgb(rgb));
 
 always @(posedge clk) begin
