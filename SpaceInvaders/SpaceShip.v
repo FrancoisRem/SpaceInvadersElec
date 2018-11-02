@@ -31,10 +31,13 @@ module SpaceShip(
 
 parameter SCREEN_WIDTH = 640 ;
 parameter SCREEN_HEIGHT = 480 ;
-parameter SHIP_WIDTH = 60 ;
-parameter SHIP_HEIGHT = 30 ;
-parameter STEP = 20 ;
-parameter NONE = 7 ;
+    
+parameter SHIP_WIDTH = 60 ; // Width of the ship
+parameter SHIP_HEIGHT = 30 ; // Height of the ship
+    
+parameter STEP = 20 ; // Nb pixel for moving the ship
+    
+
 parameter BACKGROUND = 0 ;
 parameter SPACESHIP = 1 ;
 parameter ALIENS0 = 2 ;
@@ -42,55 +45,65 @@ parameter ALIENS1 = 3 ;
 parameter ALIENS2 = 4 ;
 parameter ALIENS3 = 5 ;
 parameter LASER = 6 ;
-parameter RECT_PERCENT = 15 ;
+parameter NONE = 7 ;
+    
+parameter RECT_PERCENT = 15 ; // Percentage of the WIDTH
 localparam RECT_WIDTH = SHIP_WIDTH*RECT_PERCENT/100;
-parameter V_OFFSET = 10 ;
-parameter H_OFFSET = 10 ;
-
-
-
-
-
+    
+parameter V_OFFSET = 10 ; // Number of pixels between bottom of the screen and ship
+parameter H_OFFSET = 10 ; // Horizontal margin (we don’t touch the side of the screen)
+    
+localparam NB_PIXELS_DOWN = SCREEN_HEIGHT - SHIP_HEIGHT - H_OFFSET;
 
 always @(posedge clk) begin
         
-                        
+    // We init our position in the middle of the screen (could be random?)
                 if (reset) begin
                                 gunPosition <= SCREEN_WIDTH/2;
                 end
-                        
+    // If we are not already full right :                 
     if (right && gunPosition + SHIP_WIDTH/2 < SCREEN_WIDTH - H_OFFSET) begin
+                        // If we have enough space to take a full step : 
                         if (SCREEN_WIDTH - H_OFFSET - gunPosition + SHIP_WIDTH/2 > STEP) begin
                                 gunPosition <= gunPosition + STEP ;
                         end
-                        else begin
-                                gunPosition <= SCREEN_WIDTH - H_OFFSET - SHIP_WIDTH/2 ;
-                        end
+                        // Otherwise, we stick to the side - offset : 
+                        else gunPosition <= SCREEN_WIDTH - H_OFFSET - SHIP_WIDTH/2 ;
+                                
                 end
                 
                 
-                
+     // Same on the left         
     if (left && gunPosition - SHIP_WIDTH/2 > H_OFFSET) begin
                         if (gunPosition - SHIP_WIDTH/2 - H_OFFSET > STEP) begin
                                 gunPosition <= gunPosition - STEP ;
                         end
-                        else begin
-                                gunPosition <= H_OFFSET + SHIP_WIDTH/2 ;
-                        end
+                        else gunPosition <= H_OFFSET + SHIP_WIDTH/2 ;
+                                
+                       
                 end
                 
         
-                
-        if (vPos>V_OFFSET && vPos<SHIP_HEIGHT+V_OFFSET && hPos > gunPosition - SHIP_WIDTH/2 && hPos < gunPosition + SHIP_WIDTH/2) begin
+        
+    // We now need to manage the color, meaning we have to compute our ship's shape 
+    
+    // First, we check if vPos and hPos are where our ship is
+    if (vPos>(SCREEN_HEIGHT - SHIP_HEIGHT - H_OFFSET+1) && vPos < (SCREEN_HEIGHT - H_OFFSET+1) && hPos > gunPosition - SHIP_WIDTH/2 && hPos < gunPosition + SHIP_WIDTH/2) begin
 
             
-                        
-            if (hPos < gunPosition - SHIP_WIDTH/2 + RECT_WIDTH || hPos > gunPosition + SHIP_WIDTH/2 - RECT_WIDTH || vPos == (H_OFFSET+1)) begin
+         // After that, if hPos is where our rect. are or if vPos is at the base of our ship : color <= SPACESHIP              
+            if (hPos < gunPosition - SHIP_WIDTH/2 + RECT_WIDTH || hPos > gunPosition + SHIP_WIDTH/2 - RECT_WIDTH || vPos == (SCREEN_HEIGHT - H_OFFSET)) begin
 
                 color <= SPACESHIP;
 
             end  
-            else if ((hPos < gunPosition && hPos > gunPosition - (SHIP_HEIGHT + H_OFFSET - vPos)) || (hPos > gunPosition && hPos < gunPosition + (SHIP_HEIGHT + H_OFFSET - vPos))) begin
+         // We now have to manage the triangle : 
+         // We consider that, starting from the top of the triangle, every pixel down will incr one pixel on each side 
+         // of the triangle 
+            
+            // nb_pixels_down := vPos - (SCREEN_HEIGHT - SHIP_HEIGHT - H_OFFSET)
+            // We need to compare hPos with gunPosition +/- nb_pixels_down
+        else if ( (  hPos < gunPosition && hPos > (gunPosition - (vPos-NB_PIXELS_DOWN))  ) || ( hPos > gunPosition && hPos < gunPosition + (vPos-NB_PIXELS_DOWN)) ) begin
 
                 color <= SPACESHIP;
 
