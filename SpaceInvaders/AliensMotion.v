@@ -17,14 +17,19 @@ module AliensMotion(
 
 parameter NB_LIN = 4;
 parameter NB_COL = 8;
+    
 parameter OFFSET_H = 10;
 parameter OFFSET_V = 5 ; 
+    
 parameter ALIENS_WIDTH = 20 ;
 parameter ALIENS_HEIGHT = 10;
+    
 parameter STEP_H = 20 ; // Space between Aliens
 parameter STEP_V = 10 ;
+    
 parameter STEP_H_MOTION = 1 ;
 parameter STEP_V_MOTION = 15 ; // Step for aliens motion going down
+    
 parameter SCREEN_WIDTH = 640 ;
 parameter SCREEN_HEIGHT = 480;
 
@@ -41,7 +46,7 @@ parameter LIMIT_BOTTOM = 40;
 reg indxLeft; // First alive col 
 reg indxRight; // Last alive col
 reg indxBottom; // First layer 
-reg testBottom = 0;
+reg testBottom = 0; // Test if our first layer our aliens is done or not 
 
 integer i;
 integer j;
@@ -53,10 +58,9 @@ always @(posedge clk) begin
     
 
     if (reset) begin 
-        alive <= 4294967295;//Init all on 1,2**35-1
-        xAlien <= 30; //Default value 
-        yAlien <= 30;  // Default value 
-        //colAvailables = //Init all on 1;
+        alive <= 4294967295;//Init all on 1 (i.e 2**32-1)
+        xAlien <= 40; //Default value 
+        yAlien <= 40;  // Default value 
         indxLeft <= 0;
         indxRight <= NB_COL-1;
         indxBottom = NB_LIN -1;
@@ -65,11 +69,11 @@ always @(posedge clk) begin
 
     // Update on indxLeft and right, it will help us to compute canLeft and canRight 
 
-    if (alive[indxLeft] == 0 && alive[indxLeft + 9] == 0 && alive[indxLeft + 18] == 0 && alive[indxLeft + 27] == 0) begin
+    if (alive[indxLeft] == 0 && alive[indxLeft + 8] == 0 && alive[indxLeft + 16] == 0 && alive[indxLeft + 24] == 0) begin
         indxLeft <= indxLeft +1;
     end 
 
-    if (alive[indxRight] == 0 && alive[indxRight + 9] == 0 && alive[indxRight + 18] == 0 && alive[indxRight + 27] == 0) begin
+    if (alive[indxRight] == 0 && alive[indxRight + 8] == 0 && alive[indxRight + 16] == 0 && alive[indxRight + 24] == 0) begin
         indxRight <= indxRight -1;
     end 
 
@@ -145,7 +149,7 @@ always @(posedge clk) begin
         LEFT : if (canLeft) xAlien <= xAlien - STEP_V_MOTION;
         RIGHT : if (canRight) xAlien <= xAlien + STEP_V_MOTION;
         DOWN : if (defeat == 0) yAlien <= yAlien + STEP_H_MOTION;
- 
+        default : xAlien <= xAlien;
     endcase
 
 
