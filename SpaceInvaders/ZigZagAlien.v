@@ -24,7 +24,7 @@ module ZigZagAlien(
     input enable,
     input canLeft,
     input canRight,
-    output reg[2:0] Motion
+    output reg[1:0] Motion
     );
 
 	parameter NO_MOTION = 0 ;
@@ -51,11 +51,11 @@ module ZigZagAlien(
 	
 	always @(etat) begin
 		case (etat)
-			NO_MOTION: Motion = 3'b000;
-			RIGHT:     Motion = 3'b100;
-			DOWN:      Motion = 3'b010;
-			LEFT:      Motion = 3'b001;
-			default:   Motion = 3'b000;
+			NO_MOTION: Motion = 0;
+			RIGHT:     Motion = 2;
+			DOWN:      Motion = 3;
+			LEFT:      Motion = 1;
+			default:   Motion = 0;
 		endcase
 	end
 
