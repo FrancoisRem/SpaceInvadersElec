@@ -28,47 +28,60 @@ module Vga(
     output reg [9:0] vPos
     );
 	 
- //TimeUnitEnable#(.FREQ_WANTED(25000000)) TimeUnit1 (.reset(reset),.clk(clk),.pulse(enable),.enable(1));
 
-
+localparam HMAX = 800;
+localparam VMAX = 521;
+localparam RESET = 0;
+	
+localparam HS_STA = 640 + 16;              
+localparam HS_END = 640 + 16 + 96;           
+localparam VS_STA = 480 + 11;        
+localparam VS_END = 480 + 11 + 2; 
+	
 always @(posedge clk) begin
-if(reset==0) begin
-	if (enable == 1) begin
-		if (hPos == 800) begin
-			if (vPos == 521) begin
-				vPos <= 0;
+
+if (reset) begin 
+	vSync<=RESET;
+	hSync<=RESET;
+	hPos<=RESET;
+	vPos<=RESET;		
+end 
+
+else begin 
+	if (enable) begin
+		if (hPos == HMAX) begin
+			hPos <= RESET;
+			if (vPos == VMAX) begin
+				vPos <= RESET;
 			end
 			else begin
 				vPos <= vPos + 1;
 			end
-			hPos <= 0;
+			
 		end
-		else begin
-			hPos <= hPos + 1;
-		end
+		else hPos <= hPos + 1;
+			
+		
 	end
 	
-	if(656 <= hPos & hPos < 752) begin
-		hSync <= 0;
-	end
-	else begin
-		hSync<=1;
-	end
+	hSync <= ~((hPos >= HS_STA) & (hPos < HS_END));
+	vSync <= ~((vPos >= VS_STA) & (vPos < VS_END));
+	
+	//if(656 <= hPos & hPos < 752) begin
+		//hSync <= 0;
+	//end
+	//else begin
+		//hSync<=1;
+	//end
 
-	if(490 <= vPos & vPos < 492) begin
-		vSync <= 0;
-	end
-	else begin
-		vSync<=1;
-	end
-end
+	//if(490 <= vPos & vPos < 492) begin
+		//vSync <= 0;
+	//end
+	//else begin
+		//vSync<=1;
+	//end	
+end 
 
-else begin
-	vSync<=0;
-	hSync<=0;
-	hPos<=0;
-	vPos<=0;
-end
 end
 
 
