@@ -18,6 +18,7 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
+
 module FinalColor(
     input [2:0] colorInput,
     input [9:0] hPos,
@@ -33,12 +34,12 @@ reg [2:0] color_reg ;
 assign color = color_reg ;
 
 always @(hPos, vPos) begin
-	if (hPos>640 || vPos>480) begin
-			color_reg = 3'b111 ;
+	if (hPos>SCREEN_WIDTH | vPos>SCREEN_HEIGHT) begin
+			color_reg <= NONE ;
 	end
 
 	else begin
-		color_reg = colorInput ;
+		color_reg <= colorInput ;
 	end
 end
 endmodule
