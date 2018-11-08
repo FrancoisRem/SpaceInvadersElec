@@ -88,13 +88,13 @@ always @(posedge clk) begin
     // We now need to manage the color, meaning we have to compute our ship's shape 
     
     // First, we check if vPos and hPos are where our ship is
-    if (vPos>(SCREEN_HEIGHT - SHIP_HEIGHT - H_OFFSET+1) && vPos < (SCREEN_HEIGHT - H_OFFSET+1) && hPos > gunPosition - SHIP_WIDTH/2 && hPos < gunPosition + SHIP_WIDTH/2) begin
+    if (vPos>(SCREEN_HEIGHT - SHIP_HEIGHT - H_OFFSET+1) && vPos < (SCREEN_HEIGHT - H_OFFSET+1) && hPos > gunPosition - SHIP_WIDTH/2 -  RECT_WIDTH && hPos < gunPosition + SHIP_WIDTH/2+ RECT_WIDTH) begin
 
             
          // After that, if hPos is where our rect. are or if vPos is at the base of our ship : color <= SPACESHIP              
-            if (hPos < gunPosition - SHIP_WIDTH/2 + RECT_WIDTH || hPos > gunPosition + SHIP_WIDTH/2 - RECT_WIDTH || vPos == (SCREEN_HEIGHT - H_OFFSET)) begin
+            if ( (hPos > gunPosition - SHIP_WIDTH/2 && hPos < gunPosition - SHIP_WIDTH/2 + RECT_WIDTH) || (hPos > gunPosition + SHIP_WIDTH/2 - RECT_WIDTH && hPos < gunPosition + SHIP_WIDTH/2) ) begin
 
-                color <= SPACESHIP;
+                color <= SPACESHIP;//ALIENS1;
 
             end  
          // We now have to manage the triangle : 
@@ -105,7 +105,7 @@ always @(posedge clk) begin
             // We need to compare hPos with gunPosition +/- nb_pixels_down
         else if ( (  hPos < gunPosition && hPos > (gunPosition - (vPos-NB_PIXELS_DOWN))  ) || ( hPos > gunPosition && hPos < gunPosition + (vPos-NB_PIXELS_DOWN)) ) begin
 
-                color <= SPACESHIP;
+                color <= SPACESHIP;//ALIENS1;
 
             end
             else color <= BACKGROUND;
@@ -115,3 +115,4 @@ always @(posedge clk) begin
 end
         
 endmodule
+
