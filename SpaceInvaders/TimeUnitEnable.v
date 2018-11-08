@@ -20,8 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 module TimeUnitEnable(
     input clk,
-	input reset,
-	input enable,
+	 input reset,
     output pulse
     );
 	
@@ -40,12 +39,10 @@ module TimeUnitEnable(
 	
 	always @(posedge clk) begin
 		if (reset) cpt <= 0 ;
-		else if (enable) begin 
-			if (cpt == NB_TIC - 1) cpt <= 0 ;
+		else if (cpt == NB_TIC - 1) cpt <= 0 ;
 			else cpt <= cpt + 1 ;
-		end
 	end
 	
-	assign pulse = enable && (cpt == NB_TIC - 1) ;
+	assign pulse = cpt == NB_TIC - 1 ;
 	
 endmodule
