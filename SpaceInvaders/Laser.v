@@ -12,9 +12,9 @@ module Laser (
   output reg[2:0] colorLaser
   );
 
-parameter BACKGROUND = 0 ; // Background color code
-parameter LASER = 6 ; // Laser color code
-parameter RADIUS = 4 ;
+parameter BACKGROUND = 0;// Background color code
+parameter LASER = 3 ; // Laser color code
+parameter RADIUS = 20;
 
 parameter SCREEN_WIDTH = 640 ;
 parameter SCREEN_HEIGHT = 480 ;
@@ -24,14 +24,16 @@ parameter V_OFFSET = 10 ; // Number of pixels between bottom of the screen and s
 parameter STEP_MOTION = 1 ; // Number of pixels of vertical laser motion
 
 reg laserAlive;
-assign vgaInLaser = (hPos - xLaser) * (hPos - xLaser) + (vPos - yLaser) * (vPos - yLaser) <= RADIUS * RADIUS;
 
-always @ (clk) begin
+
+always @(posedge clk) begin
+
+
   if (reset) begin
     laserAlive <= 0;
 	 // put the laser at the right bottom of the screen
-	 xLaser = SCREEN_WIDTH - 1;
-	 yLaser = SCREEN_HEIGHT - 1;
+	 xLaser = SCREEN_WIDTH/2 - 1;
+	 yLaser = SCREEN_HEIGHT/2 - 1;
   end
 
   else if (enable) begin
@@ -42,19 +44,20 @@ always @ (clk) begin
 			// we destroy the laser
 			laserAlive <= 0;
 			// put the laser at the right bottom of the screen
-			xLaser = SCREEN_WIDTH - 1;
-			yLaser = SCREEN_HEIGHT - 1;
+			xLaser = SCREEN_WIDTH/2 - 1;
+			yLaser = SCREEN_HEIGHT/2 - 1;
 		end
       else begin
-        if (yLaser > 0)
+        if (yLaser > STEP_MOTION) begin
           // update laser position
           yLaser = yLaser - STEP_MOTION;
+			 end
         else begin
           // laser out of screen, so we destroy it
           laserAlive <= 0;
 			 // put the laser at the right bottom of the screen
-			 xLaser = SCREEN_WIDTH - 1;
-			 yLaser = SCREEN_HEIGHT - 1;
+			 xLaser = SCREEN_WIDTH/2 - 1;
+			 yLaser = SCREEN_HEIGHT/2 - 1;
 			end
       end
     end
@@ -71,10 +74,10 @@ always @ (clk) begin
     end
 
     // HANDLE COLOR
-    if (laserAlive & vgaInLaser) 
+    if ((hPos - xLaser) * (hPos - xLaser) + (vPos - yLaser) * (vPos - yLaser) < RADIUS * RADIUS) begin
       colorLaser = LASER;
-    else
-      colorLaser = BACKGROUND;
+	 end
+    else colorLaser = BACKGROUND;
 
   end
 end
