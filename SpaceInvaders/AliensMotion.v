@@ -1,8 +1,10 @@
+
+/*
 module AliensMotion(
     input clk,reset,
     input [9:0] xLaser,
     input [9:0] yLaser,
-    input [2:0] motion,
+    input [1:0] motion,
     input [9:0] hPos,
     input [9:0] vPos,
     output reg killingAlien,
@@ -10,9 +12,9 @@ module AliensMotion(
     output reg canRight,
     output reg victory,
     output reg defeat,
-    output reg [9:0] xAlien, // needs to be signed 
+    output reg signed [10:0] xAlien, // needs to be signed 
     output reg [9:0] yAlien,
-    output reg [31:0] alive // On place les 36 aliens; 
+    output reg [31:0] alive // On place les 32 aliens; 
 );
 
 parameter NB_LIN = 4;
@@ -58,7 +60,7 @@ always @(posedge clk) begin
     
 
     if (reset) begin 
-        alive <= 4294967295;//Init all on 1 (i.e 2**32-1)
+        alive <= 31'hFFFFFFFF;//4294967295;//Init all on 1 (i.e 2**32-1)
         xAlien <= 40; //Default value 
         yAlien <= 40;  // Default value 
         indxLeft <= 0;
@@ -149,7 +151,6 @@ always @(posedge clk) begin
         LEFT : if (canLeft) xAlien <= xAlien - STEP_V_MOTION;
         RIGHT : if (canRight) xAlien <= xAlien + STEP_V_MOTION;
         DOWN : if (defeat == 0) yAlien <= yAlien + STEP_H_MOTION;
-        default : xAlien <= xAlien;
     endcase
 
 
@@ -157,6 +158,165 @@ end
 
 endmodule
 
+*/`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    20:03:14 10/31/2018 
+// Design Name: 
+// Module Name:    AliensMotion 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module AliensMotion(
+    input clk,
+    input reset,
+    input [9:0] xLaser,
+    input [9:0] yLaser,
+    input [1:0] motion,
+    input [9:0] hPos,
+    input [9:0] vPos,
+    output killingAlien,
+    output canLeft,
+    output canRight,
+    output [9:0] xAlien,
+    output [9:0] yAlien,
+    output [31:0] alive,
+    output victory,
+    output defeat
+    );
+	 
+parameter NB_LIN = 4;
+parameter NB_COL = 8;
+parameter OFFSET_H = 10;
+parameter OFFSET_V = 5;
+parameter ALIENS_WIDTH = 20;
+parameter ALIENS_HEIGHT = 10;
+parameter STEP_H = 20; // Space between Aliens
+parameter STEP_V = 10;
+parameter STEP_H_MOTION = 1;
+parameter STEP_V_MOTION = 15; // Step for aliens motion going down
+parameter SCREEN_WIDTH = 639;
+parameter SCREEN_HEIGHT = 479;
+
+//Parameters for motion
+
+parameter LEFT = 1;
+parameter RIGHT = 2;
+parameter DOWN = 3;
+
+reg [7:0] i;
+reg [7:0] j;
+reg [7:0] m;
+reg [7:0] n;
+reg [7:0] i1;
+reg [7:0] j1;
+reg signed [10:0] x;
+reg [9:0] y;
+reg [9:0] y1;
+reg [35:0] reg_canLeft1;
+reg [35:0] reg_canRight1;
+reg reg_defeat;
+reg reg_canLeft;
+reg reg_canRight;
+
+reg signed [10:0] reg_xAlien;
+reg [9:0] reg_yAlien;
+reg [31:0] reg_alive;
+reg reg_killingAlien;
+assign xAlien = reg_xAlien;
+assign yAlien = reg_yAlien;
+assign killingAlien = reg_killingAlien;
+assign alive = reg_alive;
+assign victory = reg_alive == 0 ? 1 : 0 ;
+assign defeat = reg_defeat;
+assign canLeft = reg_canLeft;
+assign canRight = reg_canRight;
+
+
+always @(posedge clk) begin	// DÃ©placement des Aliens
+	if(reset) begin
+		reg_xAlien <= OFFSET_H;
+		reg_yAlien <= OFFSET_V;
+	end
+	else case(motion) 
+		2'b01: reg_xAlien <= reg_xAlien + STEP_H_MOTION ;
+		2'b10: reg_xAlien <= reg_xAlien - STEP_H_MOTION ;
+		2'b11: reg_yAlien <= reg_yAlien + STEP_V_MOTION ;
+	endcase
+end
+
+always @(posedge clk) begin	// tests de collison
+	if(reset) begin
+		reg_alive <= 32'hFFFFFFFF;
+		reg_killingAlien <= 0;
+		reg_canLeft1 <= 36'h7FBFDFEFF;
+		reg_canRight1 <= 36'hFFFFFFFFF;
+	end
+	else begin
+		reg_killingAlien <= 0 ;
+		for (i=0;i<NB_LIN;i=i+1)
+			for(j=0;j<NB_COL;j=j+1) begin
+				x = reg_xAlien + j*(ALIENS_WIDTH + STEP_H);
+				y = reg_yAlien + i*(ALIENS_HEIGHT + STEP_V);
+				if( alive[i*NB_COL + j] &&
+					yLaser >= y &&
+					yLaser <= y + ALIENS_HEIGHT && 
+					xLaser >= x && 
+					xLaser <= x + ALIENS_WIDTH) begin
+						reg_alive[i*NB_COL + j] <= 0;
+						reg_killingAlien <= 1 ;
+				end
+				reg_canLeft1[i*NB_COL + j] <= (x > OFFSET_H) ? 1:0;
+				reg_canRight1[i*NB_COL + j] <= (x < (SCREEN_WIDTH - OFFSET_H - ALIENS_WIDTH)) ? 1:0;
+			end
+	end
+end			
+
+
+always @(posedge clk) begin //possibilité de déplacement ou non
+	if(reset)begin
+	reg_canLeft = 0;
+	reg_canRight = 1;
+	end
+	m = 0;
+	n = 0;
+	while(n < 8 && ~alive[m*NB_COL+n]) begin
+		m = m + 1;
+		if (m == NB_LIN) begin
+			n = n + 1;
+			m = 0;
+		end
+	end
+    reg_canLeft = reg_canLeft1[m*NB_COL+n];
+	 reg_canRight = reg_canRight1[m*NB_COL+n];
+end
+
+	
+always @(posedge clk) begin //cas de défaite
+	if(reset) begin
+		reg_defeat = 0;
+	end
+			for (i1=0;i1<NB_LIN;i1=i1+1)
+				for(j1=0;j1<NB_COL;j1=j1+1) begin
+			y1 = reg_yAlien + i1*(ALIENS_HEIGHT + STEP_V);
+					if(alive[i1*NB_COL + j1] && y1 >= SCREEN_HEIGHT - ALIENS_HEIGHT - OFFSET_V) begin
+					reg_defeat = 1;
+					end
+			end
+end
+	
+endmodule
 
 
 
