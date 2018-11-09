@@ -14,7 +14,7 @@ module Laser (
 
 parameter BACKGROUND = 0;// Background color code
 parameter LASER = 3 ; // Laser color code
-parameter RADIUS = 20;
+parameter RADIUS = 4;
 
 parameter SCREEN_WIDTH = 640 ;
 parameter SCREEN_HEIGHT = 480 ;
@@ -32,8 +32,8 @@ always @(posedge clk) begin
   if (reset) begin
     laserAlive <= 0;
 	 // put the laser at the right bottom of the screen
-	 xLaser = SCREEN_WIDTH/2 - 1;
-	 yLaser = SCREEN_HEIGHT/2 - 1;
+	 xLaser = SCREEN_WIDTH - 1;
+	 yLaser = SCREEN_HEIGHT - 1;
   end
 
   else if (enable) begin
@@ -44,8 +44,8 @@ always @(posedge clk) begin
 			// we destroy the laser
 			laserAlive <= 0;
 			// put the laser at the right bottom of the screen
-			xLaser = SCREEN_WIDTH/2 - 1;
-			yLaser = SCREEN_HEIGHT/2 - 1;
+			xLaser = SCREEN_WIDTH - 1;
+			yLaser = SCREEN_HEIGHT - 1;
 		end
       else begin
         if (yLaser > STEP_MOTION) begin
@@ -56,8 +56,8 @@ always @(posedge clk) begin
           // laser out of screen, so we destroy it
           laserAlive <= 0;
 			 // put the laser at the right bottom of the screen
-			 xLaser = SCREEN_WIDTH/2 - 1;
-			 yLaser = SCREEN_HEIGHT/2 - 1;
+			 xLaser = SCREEN_WIDTH - 1;
+			 yLaser = SCREEN_HEIGHT - 1;
 			end
       end
     end
@@ -74,12 +74,15 @@ always @(posedge clk) begin
     end
 
     // HANDLE COLOR
-    if ((hPos - xLaser) * (hPos - xLaser) + (vPos - yLaser) * (vPos - yLaser) < RADIUS * RADIUS) begin
+    
+  end
+  
+end
+
+always @(reset or enable or fire or killingAlien or gunPosition or hPos or vPos) begin
+	 if (laserAlive && (hPos - xLaser) * (hPos - xLaser) + (vPos - yLaser) * (vPos - yLaser) < RADIUS * RADIUS) begin
       colorLaser = LASER;
 	 end
-    else colorLaser = BACKGROUND;
-
-  end
-end
+    else colorLaser = BACKGROUND;end 
 
 endmodule
