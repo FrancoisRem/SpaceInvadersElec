@@ -1,4 +1,9 @@
 
+
+
+
+
+
 /*
 module AliensMotion(
     input clk,reset,
@@ -178,6 +183,8 @@ endmodule
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
+
+/*
 module AliensMotion(
     input clk,
     input reset,
@@ -189,7 +196,7 @@ module AliensMotion(
     output killingAlien,
     output canLeft,
     output canRight,
-    output [9:0] xAlien,
+    output signed [10:0] xAlien,
     output [9:0] yAlien,
     output [31:0] alive,
     output victory,
@@ -318,8 +325,64 @@ end
 	
 endmodule
 
+*/
 
+/*
 
+module AliensMotion(
+    input clk,
+    input reset,
+    input [9:0] xLaser,
+    input [9:0] yLaser,
+    input [1:0] motion,
+    input [9:0] hPos,
+    input [9:0] vPos,
+    output reg killingAlien,
+    output reg canLeft,
+    output reg canRight,
+    output reg [9:0] xAlien,
+    output reg [9:0] yAlien,
+    output reg [31:0] alive,
+    output reg victory,
+    output reg defeat
+    );
+	 
+	 
+parameter NB_LIN = 4;
+parameter NB_COL = 8;
+parameter OFFSET_H = 10;
+parameter OFFSET_V = 5;
+parameter ALIENS_WIDTH = 20;
+parameter ALIENS_HEIGHT = 10;
+parameter STEP_H = 20; // Space between Aliens
+parameter STEP_V = 10;
+parameter STEP_H_MOTION = 1;
+parameter STEP_V_MOTION = 15; // Step for aliens motion going down
+parameter SCREEN_WIDTH = 639;
+parameter SCREEN_HEIGHT = 479;
 
+//Parameters for motion
 
+parameter LEFT = 1;
+parameter RIGHT = 2;
+parameter DOWN = 3;
+	 
+always @(reset, xLaser, yLaser, motion, hPos, vPos, killingAlien, canLeft, canRight, xAlien, yAlien, alive, victory, defeat) begin
+
+ 
+	killingAlien <= 0;
+	canLeft <= 1;
+	canRight <= 1;
+	xAlien <= 10;
+	yAlien <= 10;
+	alive <= 32'hFFFFFFFF;
+	defeat <= 0;
+	victory <= 0;
+	
+
+end
+	 
+endmodule
+
+*/
 
