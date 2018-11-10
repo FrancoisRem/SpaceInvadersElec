@@ -3,27 +3,39 @@
 
 
 
+`timescale 1ns / 1ps
 
-/*
 module AliensMotion(
-    input clk,reset,
-    input [9:0] xLaser,
-    input [9:0] yLaser,
-    input [1:0] motion,
-    input [9:0] hPos,
-    input [9:0] vPos,
-    output reg killingAlien,
-    output reg canLeft,
-    output reg canRight,
-    output reg victory,
-    output reg defeat,
-    output reg signed [10:0] xAlien, // needs to be signed 
-    output reg [9:0] yAlien,
-    output reg [31:0] alive // On place les 32 aliens; 
+    clk,reset,
+    xLaser,
+    yLaser,
+    motion,
+    hPos,
+    vPos,
+    killingAlien,
+    canLeft,
+    canRight,
+    victory,
+    defeat,
+    xAlien, // needs to be signed 
+    yAlien,
+    alive // On place les 32 aliens;
 );
 
-parameter NB_LIN = 4;
-parameter NB_COL = 8;
+parameter NB_LIN = 2;
+parameter NB_COL = 2;
+
+parameter NB_ALIENS = NB_COL*NB_LIN;
+
+function integer Size(input integer in);
+		for (Size =0 ; in >0 ; Size = Size + 1) in = in >> 1 ;
+endfunction
+
+
+
+localparam SIZE_I = Size(NB_LIN);
+localparam SIZE_J = Size(NB_COL);
+
     
 parameter OFFSET_H = 10;
 parameter OFFSET_V = 5 ; 
@@ -50,14 +62,49 @@ parameter DOWN = 3;
 
 parameter LIMIT_BOTTOM = 40;
 
+
+///////////////////////////////////////////////////////
+
+// Inputs & Outputs : 
+
+input clk;
+input reset;
+input [9:0] xLaser;
+input [9:0] yLaser;
+input [1:0] motion;
+input [9:0] hPos;
+input [9:0] vPos;
+output reg killingAlien;
+output reg canLeft;
+output reg canRight;
+output reg victory;
+output reg defeat;
+output reg signed [10:0] xAlien; // needs to be signed 
+output reg [9:0] yAlien;
+output reg [NB_ALIENS-1:0] alive; // On place les NB_ALIENS aliens;
+
+////////////////////////////////////////////////////
+
 reg indxLeft; // First alive col 
 reg indxRight; // Last alive col
 reg indxBottom; // First layer 
 reg testBottom = 0; // Test if our first layer our aliens is done or not 
 
-integer i;
-integer j;
-integer k;
+
+reg signed [10:0] x;
+reg [9:0] y;
+
+//integer i;
+//integer j;
+//integer k;
+reg [SIZE_I -1:0] i;
+reg [SIZE_J -1:0] j;
+reg [SIZE_J -1:0] k;
+
+reg [SIZE_I -1:0] sumLeft;
+reg [SIZE_I -1:0] sumRight;
+reg [SIZE_I -1:0] iLeft;
+reg [SIZE_I -1:0] iRight;
 // First, we move our aliens : 
 
 always @(posedge clk) begin 
@@ -65,7 +112,7 @@ always @(posedge clk) begin
     
 
     if (reset) begin 
-        alive <= 31'hFFFFFFFF;//4294967295;//Init all on 1 (i.e 2**32-1)
+        alive <= 15; //31'hFFFFFFFF;//4294967295;//Init all on 1 (i.e 2**32-1)
         xAlien <= 40; //Default value 
         yAlien <= 40;  // Default value 
         indxLeft <= 0;
@@ -75,15 +122,19 @@ always @(posedge clk) begin
     end 
 
     // Update on indxLeft and right, it will help us to compute canLeft and canRight 
-
-    if (alive[indxLeft] == 0 && alive[indxLeft + 8] == 0 && alive[indxLeft + 16] == 0 && alive[indxLeft + 24] == 0) begin
-        indxLeft <= indxLeft +1;
+    sumLeft = 0;
+    sumRight = 0;
+    for (iLeft = 0 ; iLeft < NB_LIN ; iLeft = iLeft +1) begin
+        sumLeft = sumLeft + alive[indxLeft + iLeft*NB_COL];
+    end 
+    for (iRight = 0 ; iRight < NB_LIN ; iRight = iRight +1) begin
+        sumRight = sumRight + alive[indxRight + iRight*NB_COL];
     end 
 
-    if (alive[indxRight] == 0 && alive[indxRight + 8] == 0 && alive[indxRight + 16] == 0 && alive[indxRight + 24] == 0) begin
-        indxRight <= indxRight -1;
-    end 
+    if (sumLeft == 0) indxLeft <= indxLeft + 1;
+    if (sumRight == 0) indxRight <= indxRight +1;
 
+    
     // Update on indxBottom : 
     
     for (k = 0 ; k < NB_COL ; k = k+1) begin 
@@ -113,37 +164,16 @@ always @(posedge clk) begin
         // We are considering the alien on the i-th ligne and the j_th col, it means that :
         // his coordinates are : X := xAlien + j*STEP_H + j*ALIENS_WIDTH  
         // and Y := yAlien + i*STEP_V + i*ALIENS_HEIGHT 
-
-        // First, we check for a collision with our laser :
-
-            if ( (xLaser < xAlien + j*STEP_H + j*ALIENS_WIDTH) && (yLaser < yAlien + i*STEP_V + i*ALIENS_HEIGHT)) begin 
-                if ( (xAlien + j*STEP_H + j*ALIENS_WIDTH - xLaser < ALIENS_WIDTH/2) && (yAlien + i*STEP_V + i*ALIENS_HEIGHT - yLaser < ALIENS_HEIGHT/2)) begin 
-                    killingAlien <= 1;
-                    alive[i*NB_COL + j] <= 0;
-                end 
-                else killingAlien <= 0;
+        if (~killingAlien && alive[i*NB_COL + j]) begin 
+            x = xAlien + j*STEP_H + j*ALIENS_WIDTH;
+            y = yAlien + i*STEP_V + i*ALIENS_HEIGHT;
+            if (yLaser >= y && yLaser <= y + ALIENS_HEIGHT && xLaser >= x && xLaser <= x + ALIENS_WIDTH) begin 
+                killingAlien = 1;
+                alive[i*NB_COL + j] <= 0;
             end 
-            else if (xAlien + j*STEP_H + j*ALIENS_WIDTH < xLaser && yLaser < yAlien + i*STEP_V + i*ALIENS_HEIGHT) begin 
-                if ( (xLaser-xAlien + j*STEP_H + j*ALIENS_WIDTH < ALIENS_WIDTH/2) && (yAlien + i*STEP_V + i*ALIENS_HEIGHT - yLaser < ALIENS_HEIGHT/2)) begin 
-                    killingAlien <= 1;
-                    alive[i*NB_COL + j] <= 0;
-                end 
-                else killingAlien <= 0;
-            end 
-            else if (xAlien + j*STEP_H + j*ALIENS_WIDTH < xLaser && yAlien + i*STEP_V + i*ALIENS_HEIGHT < yLaser) begin 
-                if ((xLaser-xAlien + j*STEP_H + j*ALIENS_WIDTH < ALIENS_WIDTH/2) && (yLaser-yAlien + i*STEP_V + i*ALIENS_HEIGHT < ALIENS_HEIGHT/2)) begin 
-                    killingAlien <= 1;
-                    alive[i*NB_COL + j] <= 0;
-                end 
-                else killingAlien <= 0;
-            end 
-            else begin 
-                if ((xAlien + j*STEP_H + j*ALIENS_WIDTH - xLaser < ALIENS_WIDTH/2) && (yLaser-yAlien + i*STEP_V + i*ALIENS_HEIGHT < ALIENS_HEIGHT/2)) begin 
-                    killingAlien <= 1;
-                    alive[i*NB_COL + j] <= 0;
-                end 
-                else killingAlien <= 0;
-            end 
+        end 
+           
+        
         end 
     end
 
@@ -162,8 +192,6 @@ always @(posedge clk) begin
 end 
 
 endmodule
-
-*/`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -385,4 +413,11 @@ end
 endmodule
 
 */
+
+
+
+
+
+
+
 
