@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+ `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -32,33 +32,56 @@ module ZigZagAlien(
 	parameter RIGHT = 2 ;
 	parameter DOWN = 3 ;
 	
-	reg[1:0] etat;
-	always @(posedge clk) begin
-	  if (reset) etat <= NO_MOTION;
-	  else
-		   if (enable)
-				case (etat)
-					NO_MOTION: if (canRight) etat <= RIGHT;
-						   else etat <= DOWN;
-					RIGHT:     if (~canRight) etat <= DOWN;
-					DOWN:      if (canLeft) etat <= LEFT;
-							     else if (canRight) etat <= RIGHT;
-								  else etat <= NO_MOTION;
-					LEFT:      if (~canLeft) etat <= DOWN;
-					default:   etat <= NO_MOTION;
-				endcase
-	end
-	
-	always @(etat) begin
-		case (etat)
-			NO_MOTION: Motion = 0;
-			RIGHT:     Motion = 2;
-			DOWN:      Motion = 3;
-			LEFT:      Motion = 1;
-			default:   Motion = 0;
-		endcase
-	end
+	reg [1:0] lastMotion;
 
-					
-						
+	always @(posedge clk) begin
+	  	if (reset) begin 
+	  		Motion <= NO_MOTION;
+		  	lastMotion <= NO_MOTION;
+	  	end
+	  	else begin 
+		   if (enable) begin 
+				case (lastMotion)
+					NO_MOTION: if (canRight) begin
+									 Motion <= RIGHT;
+									 lastMotion <= RIGHT;
+								end 
+						   		else begin 
+									Motion <= DOWN;
+									lastMotion <= DOWN;
+								end 
+					RIGHT:     if (~canRight) begin 
+									 Motion <= DOWN;
+									 lastMotion <= DOWN;
+								end
+								else begin 
+									Motion <= RIGHT;
+									lastMotion <= RIGHT;
+								end 
+					DOWN:      if (canLeft) begin 
+									Motion <= LEFT;
+									lastMotion <= LEFT;
+								end 
+							    else if (canRight) begin 
+									Motion <= RIGHT;
+									lastMotion <= RIGHT;
+								end 
+								else begin 
+									 Motion <= NO_MOTION;
+									 lastMotion <= NO_MOTION;
+								end 
+					LEFT:      if (~canLeft) begin 
+									Motion <= DOWN;
+									lastMotion <= DOWN;
+								end
+								else begin 
+									Motion <= LEFT;
+									lastMotion <= LEFT;
+								end 
+				endcase
+			end 
+			else Motion <= NO_MOTION;
+		end 
+	end
+			
 endmodule
