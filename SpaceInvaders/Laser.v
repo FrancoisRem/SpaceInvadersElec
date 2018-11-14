@@ -1,3 +1,4 @@
+
 module Laser (
   input clk,
   input reset,
@@ -32,8 +33,8 @@ always @(posedge clk) begin
   if (reset) begin
     laserAlive <= 0;
 	 // put the laser at the right bottom of the screen
-	 xLaser = SCREEN_WIDTH - 1;
-	 yLaser = SCREEN_HEIGHT - 1;
+	 xLaser = 0;
+	 yLaser = 0;
   end
 
   else if (enable) begin
@@ -46,8 +47,8 @@ always @(posedge clk) begin
           // laser out of screen, so we destroy it
           laserAlive <= 0;
 			 // put the laser at the right bottom of the screen
-			 xLaser = SCREEN_WIDTH - 1;
-			 yLaser = SCREEN_HEIGHT - 1;
+			 xLaser = 0;
+			 yLaser = 0;
 			end
 	end
 	
@@ -57,8 +58,8 @@ always @(posedge clk) begin
 			// we destroy the laser
 			laserAlive <= 0;
 			// put the laser at the right bottom of the screen
-			xLaser = SCREEN_WIDTH - 1;
-			yLaser = SCREEN_HEIGHT - 1;
+			xLaser = 0;
+			yLaser = 0;
 		end
     end
 
