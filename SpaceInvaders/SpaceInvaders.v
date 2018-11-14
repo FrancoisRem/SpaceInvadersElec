@@ -1,3 +1,4 @@
+
 module SpaceInvaders (
   input clk,
   input reset,
@@ -14,8 +15,8 @@ module SpaceInvaders (
 
 // Parameters : 
 
-parameter NB_LIN = 2;
-parameter NB_COL = 2;
+parameter NB_LIN = 3;
+parameter NB_COL = 5;
 parameter NB_ALIENS = NB_LIN*NB_COL;
 
 
@@ -39,21 +40,18 @@ wire [9:0] yLaser;
 wire enableVga;
 wire enableZigZag;
 wire enableLaser;
-wire [2:0] motion;
+wire [1:0] motion;
 wire canLeft;
 wire canRight;
 wire signed [10:0] xAlien;
 wire [9:0] yAlien;
 wire [NB_ALIENS-1:0] alive;
 
-TimeUnitEnable#(.FREQ_WANTED(25000000)) timeUnitVga(.clk(clk),.reset(reset),
-.enable(1),.pulse(enableVga));
+TimeUnitEnable#(.FREQ_WANTED(25000000)) timeUnitVga(.clk(clk),.reset(reset),.pulse(enableVga));
 
-TimeUnitEnable#(.FREQ_WANTED(100)) timeUnitZigZag(.clk(clk),.reset(reset),
-.enable(1),.pulse(enableZigZag));
+TimeUnitEnable#(.FREQ_WANTED(100)) timeUnitZigZag(.clk(clk),.reset(reset),.pulse(enableZigZag));
 
-TimeUnitEnable#(.FREQ_WANTED(300)) timeUnitLaser(.clk(clk),.reset(reset),
-.enable(1),.pulse(enableLaser));
+TimeUnitEnable#(.FREQ_WANTED(300)) timeUnitLaser(.clk(clk),.reset(reset),.pulse(enableLaser));
 
 // MODULES
 Button btnLeftModule(.clk(clk), .reset(reset), .pressed(btnLeftInput),
@@ -69,7 +67,7 @@ SpaceShip spaceship(.clk(clk),.reset(reset),
 .hPos(hPos),.vPos(vPos),.gunPosition(gunPosition),.color(colorSpaceship));
 
 
-Laser laser(.clk(clk),.reset(reset),.enable(enable),
+Laser laser(.clk(clk),.reset(reset),.enable(enableLaser),
 .fire(fire),.killingAlien(killingAlien),.gunPosition(gunPosition),
 .hPos(hPos),.vPos(vPos),.xLaser(xLaser),.yLaser(yLaser),
 .colorLaser(colorLaser));
@@ -90,17 +88,16 @@ AliensMotion#(.NB_LIN(NB_LIN),.NB_COL(NB_COL)) aliensMotion(
 ColorAlien#(.NB_LIN(NB_LIN),.NB_COL(NB_COL)) colorAlienUnit(.hPos(hPos),.vPos(vPos),.xAlien(xAlien),
 .yAlien(yAlien),.alive(alive),.colorAlien(colorAlien));
 
-Vga vga(.clk(clk),.enable(enable),.reset(reset),.hPos(hPos),
+Vga_module vga(.clk(clk),.enable(enableVga),.reset(reset),.hPos(hPos),
 .vPos(vPos),.hSync(hSync),.vSync(vSync));
 FinalColor finalcolor(.colorInput(colorSum),.hPos(hPos),
 .vPos(vPos),.color(colorOutput));
 
-Rgb rgbUnit(.color(colorOutpust),.rgb(rgb));
+Rgb rgbUnit(.color(colorOutput),.rgb(rgb));
 
 always @(posedge clk) begin
-	colorSum = colorLaser + colorAlien + colorSpaceship;
+	colorSum = colorAlien + colorLaser + colorSpaceship;
 end
 
 
 endmodule // SpaceInvaders
-
