@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 `timescale 1ns / 1ps
 
 module AliensMotion(
@@ -115,7 +107,7 @@ always @(posedge clk) begin
     
 
     if (reset) begin 
-        alive <= 32767;//4294967295;//Init all on 1 (i.e 2**32-1)
+        alive <= 4294967295;//Init all on 1 (i.e 2**32-1)
         xAlien <= 40; //Default value 
         yAlien <= 40;  // Default value 
         indxLeft <= 0;
@@ -123,6 +115,8 @@ always @(posedge clk) begin
         indxBottom = NB_LIN -1;
         testBottom = 0;
 		  killingAlien = 0;
+		  defeat <= 0;
+		  victory <= 0;
     end 
 
     // Update on indxLeft and right, it will help us to compute canLeft and canRight 
@@ -153,7 +147,7 @@ always @(posedge clk) begin
 
     // and defeat : 
 
-    defeat <= (yAlien + indxBottom*STEP_V+indxBottom*ALIENS_HEIGHT + ALIENS_HEIGHT/2 > SCREEN_HEIGHT - LIMIT_BOTTOM) ? 1 : 0;
+    defeat <= ((yAlien + indxBottom*STEP_V+indxBottom*ALIENS_HEIGHT + ALIENS_HEIGHT/2 > SCREEN_HEIGHT - LIMIT_BOTTOM)) ? 1 : 0;
 
     // Computing canLeft and canRight : 
 
@@ -187,18 +181,12 @@ always @(posedge clk) begin
 
 
     case (motion) 
-        LEFT : if (canLeft) xAlien <= xAlien - STEP_V_MOTION;
-        RIGHT : if (canRight) xAlien <= xAlien + STEP_V_MOTION;
-        DOWN : if (defeat == 0) yAlien <= yAlien + STEP_H_MOTION;
-		  0 : if (defeat) begin
-								xAlien <= SCREEN_WIDTH/2;
-								yAlien <= SCREEN_HEIGHT/2;
-								end
+        LEFT : if (canLeft && ~defeat) xAlien <= xAlien - STEP_V_MOTION;
+        RIGHT : if (canRight && ~defeat) xAlien <= xAlien + STEP_V_MOTION;
+        DOWN : if (~defeat) yAlien <= yAlien + STEP_H_MOTION;
     endcase
 
 
 end 
 
 endmodule
-
-
