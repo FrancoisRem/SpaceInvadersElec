@@ -1,0 +1,104 @@
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer:
+//
+// Create Date:   19:12:40 11/14/2018
+// Design Name:   SpaceShip
+// Module Name:   /export/homes/mleclercq/SpaceInvaders/SpaceShip_Test.v
+// Project Name:  SpaceInvaders
+// Target Device:  
+// Tool versions:  
+// Description: 
+//
+// Verilog Test Fixture created by ISE for module: SpaceShip
+//
+// Dependencies:
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+////////////////////////////////////////////////////////////////////////////////
+
+module SpaceShip_Test;
+
+	// Inputs
+	reg clk;
+	reg reset;
+	reg left;
+	reg right;
+	reg [9:0] hPos;
+	reg [9:0] vPos;
+
+	// Outputs
+	wire [9:0] gunPosition;
+	wire [2:0] color;
+
+	// Instantiate the Unit Under Test (UUT)
+	SpaceShip uut (
+		.clk(clk), 
+		.reset(reset), 
+		.left(left), 
+		.right(right), 
+		.hPos(hPos), 
+		.vPos(vPos), 
+		.gunPosition(gunPosition), 
+		.color(color)
+	);
+
+	initial begin
+		// Initialize Inputs
+		clk = 0;
+		reset = 0;
+		left = 0;
+		right = 0;
+		hPos = 0;
+		vPos = 0;
+
+		// Wait 100 ns for global reset to finish
+		#100;
+		
+		reset=1;
+		clk=clk+1;
+		right=right+1;
+		#50;
+       
+
+	end
+	
+	always #10 begin
+		
+		clk= clk + 1 ;
+		reset = 0 ;
+		
+	end
+	
+	always #100 begin
+	
+		left = left + 1 ;
+	
+	end
+   
+	always #100	begin
+	
+		right = right + 1 ;
+		
+	end
+	
+	always #10 begin
+	
+		if (hPos >= 640) hPos = 0;
+		else hPos = hPos+1;
+	
+	end
+	
+	always #6400 begin
+		
+		if (vPos >= 480) vPos = 0;
+		else vPos = vPos + 1;
+		
+	end
+	
+endmodule
