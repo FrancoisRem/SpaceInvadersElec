@@ -34,7 +34,7 @@ module SpaceShip(
 parameter SCREEN_WIDTH = 640 ;
 parameter SCREEN_HEIGHT = 480 ;
     
-parameter SHIP_WIDTH = 60 ; // Width of the ship
+parameter SHIP_WIDTH = 61 ; // Width of the ship
 parameter SHIP_HEIGHT = 30 ; // Height of the ship
     
 parameter STEP = 20 ; // Nb pixel for moving the ship
@@ -53,7 +53,7 @@ parameter RECT_PERCENT = 15 ; // Percentage of the WIDTH
 localparam RECT_WIDTH = SHIP_WIDTH*RECT_PERCENT/100;
     
 parameter V_OFFSET = 10 ; // Number of pixels between bottom of the screen and ship
-parameter H_OFFSET = 10 ; // Horizontal margin (we don’t touch the side of the screen)
+parameter H_OFFSET = 10 ; // Horizontal margin (we don't touch the side of the screen)
     
 localparam NB_PIXELS_DOWN = SCREEN_HEIGHT - SHIP_HEIGHT - H_OFFSET;
 
@@ -96,7 +96,7 @@ always @(posedge clk) begin
          // After that, if hPos is where our rect. are or if vPos is at the base of our ship : color <= SPACESHIP              
             if ( (hPos > gunPosition - SHIP_WIDTH/2 && hPos < gunPosition - SHIP_WIDTH/2 + RECT_WIDTH) || (hPos > gunPosition + SHIP_WIDTH/2 - RECT_WIDTH && hPos < gunPosition + SHIP_WIDTH/2) ) begin
 
-                color <= SPACESHIP;//ALIENS1;
+                color <= SPACESHIP;
 
             end  
          // We now have to manage the triangle : 
@@ -107,7 +107,7 @@ always @(posedge clk) begin
             // We need to compare hPos with gunPosition +/- nb_pixels_down
         else if ( (  hPos < gunPosition && hPos > (gunPosition - (vPos-NB_PIXELS_DOWN))  ) || ( hPos > gunPosition && hPos < gunPosition + (vPos-NB_PIXELS_DOWN)) ) begin
 
-                color <= SPACESHIP;//ALIENS1;
+                color <= SPACESHIP;
 
             end
             else color <= BACKGROUND;
