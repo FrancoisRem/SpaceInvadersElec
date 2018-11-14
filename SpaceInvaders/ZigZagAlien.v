@@ -1,4 +1,4 @@
- `timescale 1ns / 1ps
+`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -82,6 +82,7 @@ module ZigZagAlien(
 			end 
 			else Motion <= NO_MOTION;
 		end 
+		if (enable == 0) Motion <= NO_MOTION;
 	end
 			
-endmodule
+endmodule  

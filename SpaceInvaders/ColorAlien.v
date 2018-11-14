@@ -1,3 +1,4 @@
+
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
@@ -75,7 +76,7 @@ always @(hPos or vPos or xAlien or yAlien or alive) begin
 //			begin
 //				if (hPos < xAlien +ALIENS_WIDTH*(2*j+1) && hPos > xAlien + ALIENS_WIDTH*2*j) begin
 //					if (vPos < yAlien + ALIENS_HEIGHT*(2*i+1) && vPos > yAlien + ALIENS_HEIGHT*2*i) begin
-					case ((NB_COL*i+j)%4)
+					case ((i*NB_COL + j)%4)
 						0: couleur = ALIENS0;
 						1: couleur = ALIENS1;
 						2: couleur = ALIENS2;
@@ -90,4 +91,3 @@ end
 assign colorAlien= couleur;
 
 endmodule
-

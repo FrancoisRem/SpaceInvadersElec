@@ -1,3 +1,4 @@
+
 module Laser (
   input clk,
   input reset,
@@ -14,7 +15,7 @@ module Laser (
 
 parameter BACKGROUND = 0;// Background color code
 parameter LASER = 3 ; // Laser color code
-parameter RADIUS = 4;
+parameter RADIUS = 7;
 
 parameter SCREEN_WIDTH = 640 ;
 parameter SCREEN_HEIGHT = 480 ;
@@ -32,23 +33,13 @@ always @(posedge clk) begin
   if (reset) begin
     laserAlive <= 0;
 	 // put the laser at the right bottom of the screen
-	 xLaser = SCREEN_WIDTH - 1;
-	 yLaser = SCREEN_HEIGHT - 1;
+	 xLaser = 0;
+	 yLaser = 0;
   end
 
   else if (enable) begin
-
-    // LASER ALIVE
-    if (laserAlive) begin
-      if (killingAlien) begin
-			// we destroy the laser
-			laserAlive <= 0;
-			// put the laser at the right bottom of the screen
-			xLaser = SCREEN_WIDTH - 1;
-			yLaser = SCREEN_HEIGHT - 1;
-		end
-      else begin
-        if (yLaser > STEP_MOTION) begin
+  
+	if (yLaser > STEP_MOTION) begin
           // update laser position
           yLaser = yLaser - STEP_MOTION;
 			 end
@@ -56,10 +47,20 @@ always @(posedge clk) begin
           // laser out of screen, so we destroy it
           laserAlive <= 0;
 			 // put the laser at the right bottom of the screen
-			 xLaser = SCREEN_WIDTH - 1;
-			 yLaser = SCREEN_HEIGHT - 1;
+			 xLaser = 0;
+			 yLaser = 0;
 			end
-      end
+	end
+	
+		// LASER ALIVE
+    if (laserAlive) begin
+      if (killingAlien) begin
+			// we destroy the laser
+			laserAlive <= 0;
+			// put the laser at the right bottom of the screen
+			xLaser = 0;
+			yLaser = 0;
+		end
     end
 
     // LASER NOT ALIVE
@@ -72,17 +73,19 @@ always @(posedge clk) begin
 		 yLaser = SCREEN_HEIGHT - V_OFFSET - SHIP_HEIGHT - RADIUS;
 		 end
     end
+	
+end 
 
-    // HANDLE COLOR
-    
-  end
-  
-end
 
-always @(reset or enable or fire or killingAlien or gunPosition or hPos or vPos) begin
+always @(clk or reset or enable or fire or killingAlien or gunPosition or hPos or vPos) begin
+
+	
 	 if (laserAlive && (hPos - xLaser) * (hPos - xLaser) + (vPos - yLaser) * (vPos - yLaser) < RADIUS * RADIUS) begin
-      colorLaser = LASER;
+		if (killingAlien) colorLaser = 1;
+      else colorLaser = LASER;
 	 end
-    else colorLaser = BACKGROUND;end 
+    else colorLaser = BACKGROUND;
+	 
+end 
 
 endmodule
