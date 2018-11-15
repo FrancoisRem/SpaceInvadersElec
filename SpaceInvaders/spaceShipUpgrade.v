@@ -1,5 +1,3 @@
-
-
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company:
@@ -33,10 +31,11 @@ module SpaceShip(
 
 parameter SCREEN_WIDTH = 640 ;
 parameter SCREEN_HEIGHT = 480 ;
-    
-parameter SHIP_WIDTH = 61 ; // Width of the ship
-parameter SHIP_HEIGHT = 30 ; // Height of the ship
-    
+parameter RADIUS = 30;
+parameter SHIP_WIDTH = 60 ; // Width of the ship
+parameter SHIP_HEIGHT = 75 ; // Height of the ship
+parameter COCKPIT_WIDTH = 10;
+parameter COCKPIT_LENGTH = 40;
 parameter STEP = 20 ; // Nb pixel for moving the ship
     
 
@@ -90,29 +89,23 @@ always @(posedge clk) begin
     // We now need to manage the color, meaning we have to compute our ship's shape 
     
     // First, we check if vPos and hPos are where our ship is
-    if (vPos>(SCREEN_HEIGHT - SHIP_HEIGHT - H_OFFSET+1) && vPos < (SCREEN_HEIGHT - H_OFFSET+1) && hPos > gunPosition - SHIP_WIDTH/2 -  RECT_WIDTH && hPos < gunPosition + SHIP_WIDTH/2+ RECT_WIDTH) begin
+    if ((gunPosition - hPos)*(gunPosition - hPos) + (SCREEN_HEIGHT - SHIP_HEIGHT/2 - vPos)*(SCREEN_HEIGHT - SHIP_HEIGHT/2 - vPos) < RADIUS) begin 
+        color <= SPACESHIP;
+    end 
 
-            
-         // After that, if hPos is where our rect. are or if vPos is at the base of our ship : color <= SPACESHIP              
-            if ( (hPos > gunPosition - SHIP_WIDTH/2 && hPos < gunPosition - SHIP_WIDTH/2 + RECT_WIDTH) || (hPos > gunPosition + SHIP_WIDTH/2 - RECT_WIDTH && hPos < gunPosition + SHIP_WIDTH/2) ) begin
+    else if (hPos >= gunPosition + RADIUS - COCKPIT_WIDTH && hPos <= gunPosition + RADIUS && vPos >= SCREEN_HEIGHT - V_OFFSET - RADIUS && vPos <= SHIP_HEIGHT) begin 
+        color <= SPACESHIP;
+    end 
 
+    else if ((hPos <= gunPosition - 5 && hPos >= gunPosition - RADIUS) || (hPos >= gunPosition + 5 && hPos <= gunPosition + RADIUS) ) begin 
+        if (vPos <= SCREEN_HEIGHT - SHIP_HEIGHT/2 && vPos >= SCREEN_HEIGHT - SHIP_HEIGHT) begin 
+            if (hPos > (gunPosition - (vPos-NB_PIXELS_DOWN)) ||  hPos < gunPosition + (vPos-NB_PIXELS_DOWN)) ) begin 
                 color <= SPACESHIP;
-
-            end  
-         // We now have to manage the triangle : 
-         // We consider that, starting from the top of the triangle, every pixel down will incr one pixel on each side 
-         // of the triangle 
-            
-            // nb_pixels_down := vPos - (SCREEN_HEIGHT - SHIP_HEIGHT - H_OFFSET)
-            // We need to compare hPos with gunPosition +/- nb_pixels_down
-        else if ( (  hPos < gunPosition && hPos > (gunPosition - (vPos-NB_PIXELS_DOWN))  ) || ( hPos > gunPosition && hPos < gunPosition + (vPos-NB_PIXELS_DOWN)) ) begin
-
-                color <= SPACESHIP;
-
-            end
-            else color <= BACKGROUND;
-
+            end 
         end
+    end 
+
+    else color <= BACKGROUND;
         
 end
         
