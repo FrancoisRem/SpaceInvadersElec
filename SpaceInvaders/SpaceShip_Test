@@ -64,14 +64,13 @@ module SpaceShip_Test;
 		clk=clk+1;
 		right=right+1;
 		#50;
-       
+      reset=0;
 
 	end
 	
 	always #10 begin
 		
 		clk= clk + 1 ;
-		reset = 0 ;
 		
 	end
 	
@@ -102,3 +101,4 @@ module SpaceShip_Test;
 	end
 	
 endmodule
+
