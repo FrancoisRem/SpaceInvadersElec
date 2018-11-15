@@ -76,26 +76,26 @@ module SpaceShip_Test;
 	
 	always #100 begin
 	
-		left = left + 1 ;
+		left = left + 1 ; //every time the clock goes to 1, the spaceship will move 20 on the left
 	
 	end
    
 	always #100	begin
 	
-		right = right + 1 ;
-		
+		right = right + 1 ; //every time the clock goes to 1, the spaceship will move 20 on the right
+				    //as we initialized right at 1, there will never be right and left at 1 at the same time
 	end
 	
 	always #10 begin
 	
-		if (hPos >= 640) hPos = 0;
+		if (hPos >= 640) hPos = 0; //we go through a line
 		else hPos = hPos+1;
 	
 	end
 	
 	always #6400 begin
 		
-		if (vPos >= 480) vPos = 0;
+		if (vPos >= 480) vPos = 0; //every time a line is gotten through, we change line
 		else vPos = vPos + 1;
 		
 	end
