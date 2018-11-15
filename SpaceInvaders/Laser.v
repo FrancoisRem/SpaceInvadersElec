@@ -1,4 +1,3 @@
-
 module Laser (
   input clk,
   input reset,
@@ -25,67 +24,64 @@ parameter V_OFFSET = 10 ; // Number of pixels between bottom of the screen and s
 parameter STEP_MOTION = 1 ; // Number of pixels of vertical laser motion
 
 reg laserAlive;
+reg RADIUS_SQUARED = RADIUS * RADIUS;
+assign vgaInLaser = (hPos - xLaser) * (hPos - xLaser) + (vPos - yLaser) * (vPos - yLaser) < RADIUS_SQUARED;
 
 
 always @(posedge clk) begin
 
+	if (reset) begin
+		laserAlive <= 0;
+		// put the laser at the right bottom of the screen
+		xLaser <= 0;
+		yLaser <= 0;
+	end
 
-  if (reset) begin
-    laserAlive <= 0;
-	 // put the laser at the right bottom of the screen
-	 xLaser = 0;
-	 yLaser = 0;
-  end
-
-  else if (enable) begin
-  
-	if (yLaser > STEP_MOTION) begin
-          // update laser position
-          yLaser = yLaser - STEP_MOTION;
-			 end
-        else begin
-          // laser out of screen, so we destroy it
-          laserAlive <= 0;
-			 // put the laser at the right bottom of the screen
-			 xLaser = 0;
-			 yLaser = 0;
-			end
+	else if (enable) begin
+		if (yLaser > STEP_MOTION) begin
+			// update laser position
+			yLaser <= yLaser - STEP_MOTION;
+		end
+		else begin
+			// laser out of screen, so we destroy it
+			laserAlive <= 0;
+			// put the laser at the right bottom of the screen
+			xLaser <= 0;
+			yLaser <= 0;
+		end
 	end
 	
-		// LASER ALIVE
-    if (laserAlive) begin
-      if (killingAlien) begin
+	// LASER ALIVE
+	if (laserAlive) begin
+		if (killingAlien) begin
 			// we destroy the laser
 			laserAlive <= 0;
 			// put the laser at the right bottom of the screen
-			xLaser = 0;
-			yLaser = 0;
+			xLaser <= 0;
+			yLaser <= 0;
 		end
-    end
+	end
 
-    // LASER NOT ALIVE
-    else begin
-      if (fire) begin
-        // fire laser
-        laserAlive <= 1;
-		 // put the laser at start position
-		 xLaser = gunPosition;
-		 yLaser = SCREEN_HEIGHT - V_OFFSET - SHIP_HEIGHT - RADIUS;
-		 end
-    end
+	// LASER NOT ALIVE
+	else begin
+		if (fire) begin
+			// fire laser
+			laserAlive <= 1;
+			// put the laser at start position
+			xLaser <= gunPosition;
+			yLaser <= SCREEN_HEIGHT - V_OFFSET - SHIP_HEIGHT - RADIUS;
+		end
+	end
+	
+	// Check if we should change color
+	if (laserAlive && vgaInLaser) begin
+		if (killingAlien) colorLaser <= 1;
+		else colorLaser <= LASER;
+	end
+	else colorLaser <= BACKGROUND;
+
 	
 end 
 
-
-always @(clk or reset or enable or fire or killingAlien or gunPosition or hPos or vPos) begin
-
-	
-	 if (laserAlive && (hPos - xLaser) * (hPos - xLaser) + (vPos - yLaser) * (vPos - yLaser) < RADIUS * RADIUS) begin
-		if (killingAlien) colorLaser = 1;
-      else colorLaser = LASER;
-	 end
-    else colorLaser = BACKGROUND;
-	 
-end 
 
 endmodule
